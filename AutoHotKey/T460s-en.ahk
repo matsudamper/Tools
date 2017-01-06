@@ -1,11 +1,13 @@
 #UseHook
 
+;CapsLock
 SetCapsLockState, AlwaysOff
 
 Shift & vkF0sc03A::
 send,{CapsLock}
 return
 
+;Shortcut
 CapsLock & 4::
 send,!{F4}
 return
