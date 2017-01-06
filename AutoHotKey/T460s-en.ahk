@@ -7,6 +7,11 @@ Shift & vkF0sc03A::
 send,{CapsLock}
 return
 
+;Language
+LAlt::
+send,{vkF3sc029}
+return
+
 ;Shortcut
 CapsLock & 4::
 send,!{F4}
