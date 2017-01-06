@@ -10,18 +10,19 @@ CapsLock & 4::
 send,!{F4}
 return
 
+;cursor
 CapsLock & j::
-if GetKeyState("shift", "P")
-    send,+{Left}
-else
-    send,{Left}
-return
-
-CapsLock & i::
 if GetKeyState("shift", "P")
     send,+{Up}
 else
     send,{Up}
+return
+
+CapsLock & h::
+if GetKeyState("shift", "P")
+    send,+{Left}
+else
+    send,{Left}
 return
 
 CapsLock & l::
@@ -38,14 +39,14 @@ else
     send,{Down}
 return
 
-CapsLock & u::
+CapsLock & g::
 if GetKeyState("shift", "P")
     send,+{Home}
 else
     send,{Home}
 return
 
-CapsLock & o::
+CapsLock & vkBAsc027::
 if GetKeyState("shift", "P")
     send,+{End}
 else
