@@ -8,7 +8,7 @@ send,{CapsLock}
 return
 
 ;Language
-LAlt::
+RAlt::
 send,{vkF3sc029}
 return
 
