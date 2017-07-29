@@ -26,42 +26,42 @@ send,^#{Left}
 return
 
 ;cursor
-CapsLock & j::
+CapsLock & f::
 if GetKeyState("shift", "P")
     send,+{Up}
 else
     send,{Up}
 return
 
-CapsLock & h::
+CapsLock & g::
 if GetKeyState("shift", "P")
     send,+{Left}
 else
     send,{Left}
 return
 
-CapsLock & l::
+CapsLock & h::
 if GetKeyState("shift", "P")
     send,+{Right}
 else
     send,{Right}
 return
 
-CapsLock & k::
+CapsLock & j::
 if GetKeyState("shift", "P")
     send,+{Down}
 else
     send,{Down}
 return
 
-CapsLock & g::
+CapsLock & d::
 if GetKeyState("shift", "P")
     send,+{Home}
 else
     send,{Home}
 return
 
-CapsLock & vkBAsc027::
+CapsLock & k::
 if GetKeyState("shift", "P")
     send,+{End}
 else
