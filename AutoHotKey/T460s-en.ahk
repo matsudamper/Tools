@@ -17,6 +17,14 @@ CapsLock & 4::
 send,!{F4}
 return
 
+CapsLock & Right::
+send,^#{Right}
+return
+
+CapsLock & Left::
+send,^#{Left}
+return
+
 ;cursor
 CapsLock & j::
 if GetKeyState("shift", "P")
@@ -58,4 +66,21 @@ if GetKeyState("shift", "P")
     send,+{End}
 else
     send,{End}
+return
+
+;copy & paste
+CapsLock & z::
+send,^{z}
+return
+
+CapsLock & x::
+send,^{x}
+return
+
+CapsLock & c::
+send,^{c}
+return
+
+CapsLock & v::
+send,^{v}
 return
