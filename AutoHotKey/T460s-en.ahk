@@ -17,51 +17,52 @@ CapsLock & 4::
 send,!{F4}
 return
 
-CapsLock & Right::
+;DeskTop Change
+CapsLock & o::
 send,^#{Right}
 return
 
-CapsLock & Left::
+CapsLock & u::
 send,^#{Left}
 return
 
 ;cursor
-CapsLock & f::
+CapsLock & i::
 if GetKeyState("shift", "P")
     send,+{Up}
 else
     send,{Up}
 return
 
-CapsLock & g::
+CapsLock & j::
 if GetKeyState("shift", "P")
     send,+{Left}
 else
     send,{Left}
 return
 
-CapsLock & h::
+CapsLock & l::
 if GetKeyState("shift", "P")
     send,+{Right}
 else
     send,{Right}
 return
 
-CapsLock & j::
+CapsLock & k::
 if GetKeyState("shift", "P")
     send,+{Down}
 else
     send,{Down}
 return
 
-CapsLock & d::
+CapsLock & h::
 if GetKeyState("shift", "P")
     send,+{Home}
 else
     send,{Home}
 return
 
-CapsLock & k::
+CapsLock & `;::
 if GetKeyState("shift", "P")
     send,+{End}
 else
