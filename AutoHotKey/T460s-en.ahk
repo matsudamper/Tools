@@ -84,3 +84,16 @@ return
 CapsLock & v::
 send,^{v}
 return
+
+;Develop
+CapsLock & Enter::
+send,^{Enter}
+return
+
+CapsLock & s::
+send,^{s}
+return
+
+CapsLock & w::
+send,^{w}
+return
