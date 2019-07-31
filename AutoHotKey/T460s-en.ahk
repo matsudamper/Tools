@@ -3,10 +3,6 @@
 ;CapsLock
 SetCapsLockState, AlwaysOff
 
-Shift & vkF0sc03A::
-send,{CapsLock}
-return
-
 ;Language
 RAlt::
 send,{vkF3sc029}
