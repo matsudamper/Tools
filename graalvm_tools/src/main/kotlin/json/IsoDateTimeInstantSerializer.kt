@@ -13,7 +13,7 @@ import kotlin.reflect.jvm.jvmName
 object IsoDateTimeInstantSerializer : KSerializer<Instant> {
     private val formatter: DateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(
-        IsoDateTimeInstantSerializer::class.jvmName,
+        "IsoDateTimeInstantSerializer",
         PrimitiveKind.STRING,
     )
 

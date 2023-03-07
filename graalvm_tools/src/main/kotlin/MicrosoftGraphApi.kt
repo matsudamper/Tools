@@ -41,9 +41,13 @@ class MicrosoftGraphApi(
                 HttpResponse.BodyHandlers.ofString()
             )
 
-        println(result.statusCode())
-        println(result.body())
-        val session = json.decodeFromString<MicrosoftGraphApiCreateSessionResponse>(result.body())
+        val body = result.body()
+        println("CreateUploadSession: ${result.statusCode()}")
+
+        val session = json.decodeFromString(
+            MicrosoftGraphApiCreateSessionResponse.serializer(),
+            body
+        )
 
         var nextExpectedRanges: List<String> = session.nextExpectedRanges
 
@@ -137,8 +141,7 @@ class MicrosoftGraphApi(
                 HttpResponse.BodyHandlers.ofString()
             )
         val response = result.body()
-        println(result.statusCode())
-        println(response)
+        println("Get BearerToken: ${result.statusCode()}")
 
         return Json.decodeFromString<JsonObject>(response)
             .getValue("access_token")
