@@ -10,7 +10,7 @@ base.archivesName.set("util")
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("net.matsudamper:command:1.0")
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
