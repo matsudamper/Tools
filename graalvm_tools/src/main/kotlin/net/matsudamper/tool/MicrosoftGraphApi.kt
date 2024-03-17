@@ -84,7 +84,7 @@ class MicrosoftGraphApi(
                         stream.read(byteArray)
                     }
                 }
-
+                println("Content-Range: bytes $startRange-$endRange/${allSize}")
                 val result = HttpClient.newHttpClient()
                     .send(
                         HttpRequest.newBuilder(URI(session.uploadUrl))
