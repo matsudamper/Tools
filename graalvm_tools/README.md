@@ -1,3 +1,3 @@
 ```shell
-./gradlew nativeCompile
+JAVA_HOME=$JAVA_17_HOME ./gradlew nativeCompile
 ```
