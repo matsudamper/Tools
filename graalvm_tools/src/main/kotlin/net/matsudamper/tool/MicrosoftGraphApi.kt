@@ -98,7 +98,7 @@ class MicrosoftGraphApi(
                         HttpResponse.BodyHandlers.ofString()
                     )
 
-                println(result.statusCode())
+                println("upload: ${result.statusCode()}")
                 println(result.body())
                 nextExpectedRanges = json.decodeFromString<MicrosoftGraphApiSessionUploadResponse>(result.body())
                     .nextExpectedRanges
