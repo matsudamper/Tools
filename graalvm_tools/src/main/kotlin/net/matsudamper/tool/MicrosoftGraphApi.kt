@@ -30,31 +30,32 @@ class MicrosoftGraphApi(
         bearerToken: String,
         inputStream: () -> InputStream,
     ) {
-        val url = "https://graph.microsoft.com/v1.0/users/$userObjectId/drive/root:$filePath:/createUploadSession"
+        val session = run {
+            val url = "https://graph.microsoft.com/v1.0/users/$userObjectId/drive/root:$filePath:/createUploadSession"
 
-        val result = HttpClient.newHttpClient()
-            .send(
-                HttpRequest.newBuilder(URI(url))
-                    .header("Authorization", "Bearer $bearerToken")
-                    .method(
-                        "POST", HttpRequest.BodyPublishers.noBody()
-                    )
-                    .version(HttpClient.Version.HTTP_1_1) // HTTP2だとContent-Lengthが0の時に設定されず、API側でエラーになる
-                    .build(),
-                HttpResponse.BodyHandlers.ofString()
-            )
+            val result = HttpClient.newHttpClient()
+                .send(
+                    HttpRequest.newBuilder(URI(url))
+                        .header("Authorization", "Bearer $bearerToken")
+                        .method(
+                            "POST", HttpRequest.BodyPublishers.noBody()
+                        )
+                        .version(HttpClient.Version.HTTP_1_1) // HTTP2だとContent-Lengthが0の時に設定されず、API側でエラーになる
+                        .build(),
+                    HttpResponse.BodyHandlers.ofString()
+                )
 
-        val body = result.body()
-        println("CreateUploadSession: ${result.statusCode()}")
-
-        val session = runCatching {
-            json.decodeFromString(
-                MicrosoftGraphApiCreateSessionResponse.serializer(),
-                body
-            )
-        }.onFailure {
-            println("Failed to decode: $body")
-        }.getOrThrow()
+            val body = result.body()
+            println("CreateUploadSession: ${result.statusCode()}")
+            runCatching {
+                json.decodeFromString(
+                    MicrosoftGraphApiCreateSessionResponse.serializer(),
+                    body
+                )
+            }.onFailure {
+                println("Failed to decode: $body")
+            }.getOrThrow()
+        }
 
         var nextExpectedRanges: List<String> = session.nextExpectedRanges
 
@@ -162,7 +163,7 @@ class MicrosoftGraphApi(
     private fun createFormParam(vararg keyValue: Pair<String, String>): String {
         return keyValue.map {
             URLEncoder.encode(it.first, Charsets.UTF_8) to
-                URLEncoder.encode(it.second, Charsets.UTF_8)
+                    URLEncoder.encode(it.second, Charsets.UTF_8)
         }.joinToString("&") { "${it.first}=${it.second}" }
     }
 }
