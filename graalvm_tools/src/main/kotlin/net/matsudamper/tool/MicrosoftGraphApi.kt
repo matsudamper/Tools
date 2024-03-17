@@ -92,6 +92,7 @@ class MicrosoftGraphApi(
                             .method(
                                 "PUT", HttpRequest.BodyPublishers.ofByteArray(byteArray)
                             )
+                            .version(HttpClient.Version.HTTP_1_1)
                             .build(),
                         HttpResponse.BodyHandlers.ofString()
                     )
@@ -121,6 +122,7 @@ class MicrosoftGraphApi(
                             inputStream
                         }
                     )
+                    .version(HttpClient.Version.HTTP_1_1)
                     .build(),
                 HttpResponse.BodyHandlers.ofString()
             )
@@ -144,6 +146,7 @@ class MicrosoftGraphApi(
                             )
                         )
                     )
+                    .version(HttpClient.Version.HTTP_1_1)
                     .build(),
                 HttpResponse.BodyHandlers.ofString()
             )
