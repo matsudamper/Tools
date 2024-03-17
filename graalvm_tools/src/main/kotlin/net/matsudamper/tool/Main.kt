@@ -1,3 +1,5 @@
+package net.matsudamper.tool
+
 import command.Command
 import command.CommandExecutor
 import command.ExecutableCommand

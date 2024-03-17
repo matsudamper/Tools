@@ -1,4 +1,4 @@
-package json
+package net.matsudamper.tool.json
 
 import java.time.Instant
 import java.time.format.DateTimeFormatter

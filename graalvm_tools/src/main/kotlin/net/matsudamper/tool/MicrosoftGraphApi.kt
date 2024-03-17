@@ -1,3 +1,5 @@
+package net.matsudamper.tool
+
 import java.io.InputStream
 import java.net.URI
 import java.net.URLEncoder
@@ -5,7 +7,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Instant
-import json.IsoDateTimeInstantSerializer
+import net.matsudamper.tool.json.IsoDateTimeInstantSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
