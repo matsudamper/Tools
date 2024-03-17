@@ -34,7 +34,7 @@ graalvmNative {
                 vendor.set(JvmVendorSpec.matching("GraalVM Community"))
             })
             imageName.set(base.archivesName.get())
-            mainClass.set("MainKt")
+            mainClass.set("net.matsudamper.tool.MainKt")
         }
     }
 }
