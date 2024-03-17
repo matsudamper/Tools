@@ -61,49 +61,54 @@ class MicrosoftGraphApi(
 
         val allSize = inputStream().size()
         while (nextExpectedRanges.isNotEmpty()) {
-            nextExpectedRanges.forEach {
-                val startRange: Long
-                val endRange: Long
-                run {
-                    val list = it.split("-")
-                    startRange = list[0].toLong()
-                    endRange = run {
-                        val tmp = list.getOrNull(1)
-                            ?.takeIf { it.isNotBlank() }
-                            ?.toLong()
-                            ?: (startRange + 1000)
+            val range = nextExpectedRanges.first()
+            val startRange: Long
+            val endRange: Long
+            run {
+                val list = range.split("-")
+                startRange = list[0].toLong()
+                endRange = run {
+                    val tmp = list.getOrNull(1)
+                        ?.takeIf { it.isNotBlank() }
+                        ?.toLong()
+                        ?: (startRange + 1000)
 
-                        tmp.coerceAtMost(allSize)
-                    }
+                    tmp.coerceAtMost(allSize)
                 }
-
-                val len = (endRange - startRange) + 1
-                val byteArray = ByteArray(len.toInt()).also { byteArray ->
-                    inputStream().use { stream ->
-                        stream.skipNBytes(startRange)
-                        stream.read(byteArray)
-                    }
-                }
-                val contentRange = "bytes $startRange-$endRange/${allSize}"
-                println("Content-Range: $contentRange")
-                val result = HttpClient.newHttpClient()
-                    .send(
-                        HttpRequest.newBuilder(URI(session.uploadUrl))
-                            .header("Authorization", "Bearer $bearerToken")
-                            .header("Content-Range", contentRange)
-                            .method(
-                                "PUT", HttpRequest.BodyPublishers.ofByteArray(byteArray)
-                            )
-                            .version(HttpClient.Version.HTTP_1_1)
-                            .build(),
-                        HttpResponse.BodyHandlers.ofString()
-                    )
-
-                println("upload: ${result.statusCode()}")
-                println(result.body())
-                nextExpectedRanges = json.decodeFromString<MicrosoftGraphApiSessionUploadResponse>(result.body())
-                    .nextExpectedRanges
             }
+
+            val len = (endRange - startRange) + 1
+            val byteArray = ByteArray(len.toInt()).also { byteArray ->
+                inputStream().use { stream ->
+                    stream.skipNBytes(startRange)
+                    stream.read(byteArray)
+                }
+            }
+            val contentRange = "bytes $startRange-$endRange/${allSize}"
+            println("Content-Range: $contentRange")
+            val result = HttpClient.newHttpClient()
+                .send(
+                    HttpRequest.newBuilder(URI(session.uploadUrl))
+                        .header("Authorization", "Bearer $bearerToken")
+                        .header("Content-Range", contentRange)
+                        .method(
+                            "PUT", HttpRequest.BodyPublishers.ofByteArray(byteArray)
+                        )
+                        .version(HttpClient.Version.HTTP_1_1)
+                        .build(),
+                    HttpResponse.BodyHandlers.ofString()
+                )
+
+            val statusCode = result.statusCode()
+            println("upload: $statusCode")
+            println(result.body())
+            if (statusCode == 201) {
+                // リソースの作成完了
+                break
+            }
+            nextExpectedRanges = json.decodeFromString<MicrosoftGraphApiSessionUploadResponse>(result.body())
+                .nextExpectedRanges
+
         }
     }
 
