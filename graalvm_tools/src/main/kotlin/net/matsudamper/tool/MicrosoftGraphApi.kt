@@ -84,12 +84,13 @@ class MicrosoftGraphApi(
                         stream.read(byteArray)
                     }
                 }
-                println("Content-Range: bytes $startRange-$endRange/${allSize}")
+                val contentRange = "bytes $startRange-$endRange/${allSize}"
+                println("Content-Range: $contentRange")
                 val result = HttpClient.newHttpClient()
                     .send(
                         HttpRequest.newBuilder(URI(session.uploadUrl))
                             .header("Authorization", "Bearer $bearerToken")
-                            .header("Content-Range", "bytes $startRange-$endRange/${allSize}")
+                            .header("Content-Range", contentRange)
                             .method(
                                 "PUT", HttpRequest.BodyPublishers.ofByteArray(byteArray)
                             )
