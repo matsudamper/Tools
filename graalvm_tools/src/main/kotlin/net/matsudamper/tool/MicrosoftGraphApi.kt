@@ -46,10 +46,14 @@ class MicrosoftGraphApi(
         val body = result.body()
         println("CreateUploadSession: ${result.statusCode()}")
 
-        val session = json.decodeFromString(
-            MicrosoftGraphApiCreateSessionResponse.serializer(),
-            body
-        )
+        val session = runCatching {
+            json.decodeFromString(
+                MicrosoftGraphApiCreateSessionResponse.serializer(),
+                body
+            )
+        }.onFailure {
+            println("Failed to decode: $body")
+        }.getOrThrow()
 
         var nextExpectedRanges: List<String> = session.nextExpectedRanges
 
