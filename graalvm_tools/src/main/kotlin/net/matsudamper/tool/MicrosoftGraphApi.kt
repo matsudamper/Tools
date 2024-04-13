@@ -65,15 +65,18 @@ class MicrosoftGraphApi(
             val startRange: Long
             val endRange: Long
             run {
+                // https://learn.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session
+                val maxChunkSize = 60 * 1024 * 1024
                 val list = range.split("-")
                 startRange = list[0].toLong()
                 endRange = run {
                     val tmp = list.getOrNull(1)
                         ?.takeIf { it.isNotBlank() }
                         ?.toLong()
-                        ?: (startRange + 1000)
+                        ?: (startRange + maxChunkSize)
 
                     tmp.coerceAtMost(allSize - 1)
+                        .coerceAtMost(startRange + maxChunkSize)
                 }
             }
 
