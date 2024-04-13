@@ -40,7 +40,8 @@ class MicrosoftGraphApi(
                         .method(
                             "POST", HttpRequest.BodyPublishers.noBody()
                         )
-                        .version(HttpClient.Version.HTTP_1_1) // HTTP2だとContent-Lengthが0の時に設定されず、API側でエラーになる
+                        // HTTP2だとContent-Lengthが0の時に設定されず、API側でエラーになる
+                        .version(HttpClient.Version.HTTP_1_1)
                         .build(),
                     HttpResponse.BodyHandlers.ofString()
                 )
