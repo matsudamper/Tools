@@ -73,7 +73,7 @@ class MicrosoftGraphApi(
                         ?.toLong()
                         ?: (startRange + 1000)
 
-                    tmp.coerceAtMost(allSize)
+                    tmp.coerceAtMost(allSize - 1)
                 }
             }
 
