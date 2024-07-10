@@ -10,6 +10,8 @@ jobs:
             - uses: actions/checkout@v4
             - name: build
               working-directory: graalvm_tools
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: ./gradlew nativeCompile
             - uses: actions/upload-artifact@v4
               with:
