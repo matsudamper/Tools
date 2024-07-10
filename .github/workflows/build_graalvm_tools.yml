@@ -1,0 +1,18 @@
+name: build graalvm tools
+on:
+  workflow_dispatch:
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+        steps:
+            - uses: actions/checkout@v4
+            - name: build
+              working-directory: graalvm_tools
+              run: ./gradlew nativeCompile
+            - uses: actions/upload-artifact@v4
+              with:
+                name: out
+                path: graalvm_tools/build
+                retention-days: 1
