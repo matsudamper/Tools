@@ -3,18 +3,23 @@ on:
   workflow_dispatch:
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        timeout-minutes: 20
-        steps:
-            - uses: actions/checkout@v4
-            - name: build
-              working-directory: graalvm_tools
-              env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: ./gradlew nativeCompile
-            - uses: actions/upload-artifact@v4
-              with:
-                name: out
-                path: graalvm_tools/build
-                retention-days: 1
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '17'
+          distribution: 'graalvm'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: build
+        working-directory: graalvm_tools
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew nativeCompile
+      - uses: actions/upload-artifact@v4
+        with:
+          name: out
+          path: graalvm_tools/build
+          retention-days: 1
