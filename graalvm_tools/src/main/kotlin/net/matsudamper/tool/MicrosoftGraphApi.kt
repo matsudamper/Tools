@@ -116,8 +116,8 @@ class MicrosoftGraphApi(
             val statusCode = result.statusCode()
             println("upload: $statusCode")
             println(result.body())
-            if (statusCode == 201) {
-                // リソースの作成完了
+            if (statusCode == 200 || statusCode == 201) {
+                // アップロード完了(既存ファイルの上書き時は200)
                 break
             }
             nextExpectedRanges = json.decodeFromString<MicrosoftGraphApiSessionUploadResponse>(result.body())
@@ -163,7 +163,8 @@ class MicrosoftGraphApi(
     ): Map<String, MicrosoftGraphApiDriveItem> {
         val result = mutableMapOf<String, MicrosoftGraphApiDriveItem>()
         fun traverse(encodedPath: String, relativePrefix: String) {
-            var url: String? = "https://graph.microsoft.com/v1.0/users/$userObjectId/drive/root:$encodedPath:/children" +
+            val item = if (encodedPath.isEmpty()) "root" else "root:$encodedPath:"
+            var url: String? = "https://graph.microsoft.com/v1.0/users/$userObjectId/drive/$item/children" +
                     "?\$select=name,size,file,folder&\$top=1000"
             while (url != null) {
                 val response = HttpClient.newHttpClient()
