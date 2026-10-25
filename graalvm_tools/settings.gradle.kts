@@ -11,23 +11,7 @@ dependencyResolutionManagement {
     repositories {
         mavenLocal()
         maven {
-            url = uri("https://maven.pkg.github.com/matsudamper/kotlin-shell-native")
-            val properties = java.util.Properties()
-
-            try {
-                properties.load(java.io.FileInputStream(File(rootProject.projectDir, "local.properties")))
-            } catch (_: java.io.IOException) {
-            }
-            val propertyToken = properties["GITHUB_TOKEN"]?.toString()
-
-            credentials {
-                username = "matsudamper"
-                password = if (propertyToken == null || propertyToken == "") {
-                    System.getenv("GITHUB_TOKEN")
-                } else {
-                    propertyToken
-                }
-            }
+            url = uri("https://maven.matsudamper.net/releases")
             content {
                 includeModule("net.matsudamper", "command")
             }
