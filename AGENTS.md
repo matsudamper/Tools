@@ -1,17 +1,5 @@
 # Tools
 
-## 構成
-- `AutoHotKey/`: AutoHotkey スクリプト
-- `graalvm_tools/`: Kotlin / Gradle 製の GraalVM ネイティブ CLI
-- `docs/agent-kotlin.md` と `docs/agent-gradle.md` は `graalvm_tools/` の該当作業にのみ適用し、`AutoHotKey/` には適用しない
-
-## ビルド（graalvm_tools）
-`graalvm_tools/` に移動して実行する。
-
-```sh
-JAVA_HOME=$JAVA_17_HOME ./gradlew nativeCompile
-```
-
 # 共通ルール
 
 ## docs の参照
