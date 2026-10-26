@@ -29,6 +29,7 @@ class MicrosoftGraphApi(
         filePath: String,
         bearerToken: String,
         inputStream: () -> InputStream,
+        conflictBehavior: String? = null,
     ) {
         val session = run {
             val url = "https://graph.microsoft.com/v1.0/users/$userObjectId/drive/root:$filePath:/createUploadSession"
@@ -37,9 +38,18 @@ class MicrosoftGraphApi(
                 .send(
                     HttpRequest.newBuilder(URI(url))
                         .header("Authorization", "Bearer $bearerToken")
-                        .method(
-                            "POST", HttpRequest.BodyPublishers.noBody()
-                        )
+                        .let { builder ->
+                            if (conflictBehavior == null) {
+                                builder.method("POST", HttpRequest.BodyPublishers.noBody())
+                            } else {
+                                builder.header("Content-Type", "application/json")
+                                    .method(
+                                        "POST", HttpRequest.BodyPublishers.ofString(
+                                            """{"item":{"@microsoft.graph.conflictBehavior":"$conflictBehavior"}}"""
+                                        )
+                                    )
+                            }
+                        }
                         // HTTP2だとContent-Lengthが0の時に設定されず、API側でエラーになる
                         .version(HttpClient.Version.HTTP_1_1)
                         .build(),
@@ -106,8 +116,8 @@ class MicrosoftGraphApi(
             val statusCode = result.statusCode()
             println("upload: $statusCode")
             println(result.body())
-            if (statusCode == 201) {
-                // リソースの作成完了
+            if (statusCode == 200 || statusCode == 201) {
+                // アップロード完了(既存ファイルの上書き時は200)
                 break
             }
             nextExpectedRanges = json.decodeFromString<MicrosoftGraphApiSessionUploadResponse>(result.body())
@@ -140,6 +150,53 @@ class MicrosoftGraphApi(
 
         println(result.statusCode())
         println(result.body())
+        if (result.statusCode() !in 200..299) {
+            throw IllegalStateException("Failed to upload: ${result.statusCode()}")
+        }
+    }
+
+    /**
+     * フォルダ配下のファイルを再帰的に取得する。フォルダが存在しない場合は空を返す。
+     * @param folderPath エンコード済みのパス
+     * @return フォルダからの相対パスをキーにしたMap
+     */
+    fun listFilesRecursive(
+        folderPath: String,
+        bearerToken: String,
+    ): Map<String, MicrosoftGraphApiDriveItem> {
+        val result = mutableMapOf<String, MicrosoftGraphApiDriveItem>()
+        fun traverse(encodedPath: String, relativePrefix: String) {
+            val item = if (encodedPath.isEmpty()) "root" else "root:$encodedPath:"
+            var url: String? = "https://graph.microsoft.com/v1.0/users/$userObjectId/drive/$item/children" +
+                    "?\$select=name,size,file,folder&\$top=1000"
+            while (url != null) {
+                val response = HttpClient.newHttpClient()
+                    .send(
+                        HttpRequest.newBuilder(URI(url))
+                            .header("Authorization", "Bearer $bearerToken")
+                            .GET()
+                            .version(HttpClient.Version.HTTP_1_1)
+                            .build(),
+                        HttpResponse.BodyHandlers.ofString()
+                    )
+                if (response.statusCode() == 404) return
+                if (response.statusCode() != 200) {
+                    throw IllegalStateException("Failed to list children: ${response.statusCode()} ${response.body()}")
+                }
+                val children = json.decodeFromString<MicrosoftGraphApiChildrenResponse>(response.body())
+                for (item in children.value) {
+                    val relativePath = relativePrefix + item.name
+                    if (item.folder != null) {
+                        traverse("$encodedPath/${encodePathSegment(item.name)}", "$relativePath/")
+                    } else {
+                        result[relativePath] = item
+                    }
+                }
+                url = children.nextLink
+            }
+        }
+        traverse(folderPath, "")
+        return result
     }
 
     fun getBearerToken(): String {
@@ -178,6 +235,10 @@ class MicrosoftGraphApi(
     }
 }
 
+fun encodePathSegment(segment: String): String {
+    return URLEncoder.encode(segment, Charsets.UTF_8).replace("+", "%20")
+}
+
 private fun InputStream.size(): Long {
     var size: Long = 0
     do {
@@ -204,3 +265,27 @@ data class MicrosoftGraphApiSessionUploadResponse(
     @SerialName("nextExpectedRanges") val nextExpectedRanges: List<String>,
 )
 
+
+@Serializable
+data class MicrosoftGraphApiChildrenResponse(
+    @SerialName("value") val value: List<MicrosoftGraphApiDriveItem>,
+    @SerialName("@odata.nextLink") val nextLink: String? = null,
+)
+
+@Serializable
+data class MicrosoftGraphApiDriveItem(
+    @SerialName("name") val name: String,
+    @SerialName("size") val size: Long = 0,
+    @SerialName("file") val file: File? = null,
+    @SerialName("folder") val folder: JsonObject? = null,
+) {
+    @Serializable
+    data class File(
+        @SerialName("hashes") val hashes: Hashes? = null,
+    )
+
+    @Serializable
+    data class Hashes(
+        @SerialName("quickXorHash") val quickXorHash: String? = null,
+    )
+}
