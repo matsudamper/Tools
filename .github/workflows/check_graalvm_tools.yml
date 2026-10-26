@@ -14,7 +14,7 @@ permissions:
   pull-requests: read
 
 jobs:
-  changes:
+  graalvm_tools_changes:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -29,9 +29,9 @@ jobs:
               - 'graalvm_tools/**'
               - '.github/workflows/check_graalvm_tools.yml'
 
-  build:
-    needs: changes
-    if: needs.changes.outputs.graalvm_tools == 'true'
+  graalvm_tools_build:
+    needs: graalvm_tools_changes
+    if: needs.graalvm_tools_changes.outputs.graalvm_tools == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -48,8 +48,8 @@ jobs:
         working-directory: graalvm_tools
         run: ./gradlew build nativeCompile
 
-  check:
-    needs: [changes, build]
+  graalvm_tools_check:
+    needs: [graalvm_tools_changes, graalvm_tools_build]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
