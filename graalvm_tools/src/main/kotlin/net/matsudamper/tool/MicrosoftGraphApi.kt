@@ -150,6 +150,9 @@ class MicrosoftGraphApi(
 
         println(result.statusCode())
         println(result.body())
+        if (result.statusCode() !in 200..299) {
+            throw IllegalStateException("Failed to upload: ${result.statusCode()}")
+        }
     }
 
     /**
