@@ -14,4 +14,7 @@ util sharepoint upload-diff ./dist /Backup/dist
 
 # アップロード対象の確認のみ
 util sharepoint upload-diff --dry-run ./dist /Backup/dist
+
+# APIの通信ログも出力
+util sharepoint upload-diff --verbose ./dist /Backup/dist
 ```

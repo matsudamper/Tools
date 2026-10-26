@@ -20,6 +20,7 @@ class MicrosoftGraphApi(
     private val clientId: String,
     private val clientSecret: String,
     private val userObjectId: String,
+    private val verbose: Boolean,
 ) {
     private val json = Json {
         ignoreUnknownKeys = true
@@ -57,7 +58,7 @@ class MicrosoftGraphApi(
                 )
 
             val body = result.body()
-            println("CreateUploadSession: ${result.statusCode()}")
+            printVerbose("CreateUploadSession: ${result.statusCode()}")
             runCatching {
                 json.decodeFromString(
                     MicrosoftGraphApiCreateSessionResponse.serializer(),
@@ -99,7 +100,7 @@ class MicrosoftGraphApi(
                 }
             }
             val contentRange = "bytes $startRange-$endRange/${allSize}"
-            println("Content-Range: $contentRange")
+            printVerbose("Content-Range: $contentRange")
             val result = HttpClient.newHttpClient()
                 .send(
                     HttpRequest.newBuilder(URI(session.uploadUrl))
@@ -114,8 +115,8 @@ class MicrosoftGraphApi(
                 )
 
             val statusCode = result.statusCode()
-            println("upload: $statusCode")
-            println(result.body())
+            printVerbose("upload: $statusCode")
+            printVerbose(result.body())
             if (statusCode == 200 || statusCode == 201) {
                 // アップロード完了(既存ファイルの上書き時は200)
                 break
@@ -148,8 +149,8 @@ class MicrosoftGraphApi(
                 HttpResponse.BodyHandlers.ofString()
             )
 
-        println(result.statusCode())
-        println(result.body())
+        printVerbose(result.statusCode().toString())
+        printVerbose(result.body())
         if (result.statusCode() !in 200..299) {
             throw IllegalStateException("Failed to upload: ${result.statusCode()}")
         }
@@ -219,12 +220,18 @@ class MicrosoftGraphApi(
                 HttpResponse.BodyHandlers.ofString()
             )
         val response = result.body()
-        println("Get BearerToken: ${result.statusCode()}")
+        printVerbose("Get BearerToken: ${result.statusCode()}")
 
         return Json.decodeFromString<JsonObject>(response)
             .getValue("access_token")
             .jsonPrimitive
             .content
+    }
+
+    private fun printVerbose(message: String) {
+        if (verbose) {
+            println(message)
+        }
     }
 
     private fun createFormParam(vararg keyValue: Pair<String, String>): String {
