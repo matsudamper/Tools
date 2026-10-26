@@ -1,3 +1,9 @@
+import java.nio.file.LinkOption
+import kotlin.io.path.createLinkPointingTo
+import kotlin.io.path.deleteExisting
+import kotlin.io.path.fileSize
+import kotlin.io.path.isRegularFile
+
 plugins {
     id("java")
     kotlin("jvm") version "1.8.10"
@@ -24,15 +30,44 @@ kotlin {
     jvmToolchain(17)
 }
 
+val graalVmLauncher = javaToolchains.launcherFor {
+    languageVersion.set(JavaLanguageVersion.of(17))
+    vendor.set(JvmVendorSpec.matching("GraalVM Community"))
+}
+
 graalvmNative {
     binaries {
         named("main") {
-            javaLauncher.set(javaToolchains.launcherFor {
-                languageVersion.set(JavaLanguageVersion.of(17))
-                vendor.set(JvmVendorSpec.matching("GraalVM Community"))
-            })
+            javaLauncher.set(graalVmLauncher)
             imageName.set(base.archivesName.get())
             mainClass.set("net.matsudamper.tool.MainKt")
         }
     }
+}
+
+// Workaround: https://github.com/gradle/gradle/issues/28583
+// nativeCompile / nativeTestCompile の前に壊れたシンボリックリンクを修復する
+tasks.matching { it.name == "nativeCompile" || it.name == "nativeTestCompile" }.configureEach {
+    doFirst {
+        val binPath = graalVmLauncher.get().executablePath.asFile.toPath().parent
+        val svmBinPath = binPath.resolve("../lib/svm/bin")
+        fixSymlink(binPath.resolve("native-image"), svmBinPath.resolve("native-image"))
+    }
+}
+
+// Workaround: https://github.com/gradle/gradle/issues/28583
+// Gradle のコピー処理で GraalVM JDK 内のシンボリックリンクが空ファイルに化ける問題を修正する。
+// 空ファイルになった native-image を削除し、実体へのハードリンクとして再作成する。
+fun fixSymlink(target: java.nio.file.Path, expectedSrc: java.nio.file.Path) {
+    if (!expectedSrc.isRegularFile(LinkOption.NOFOLLOW_LINKS)) {
+        logger.info("fixSymlink: expected is not regular, skip (expected: {})", expectedSrc)
+        return
+    }
+    if (!target.isRegularFile(LinkOption.NOFOLLOW_LINKS) || target.fileSize() > 0) {
+        logger.info("fixSymlink: target is not regular or the file size > 0, skip (target: {})", target)
+        return
+    }
+    logger.warn("fixSymlink: {} -> {}", target, expectedSrc)
+    target.deleteExisting()
+    target.createLinkPointingTo(expectedSrc)
 }
