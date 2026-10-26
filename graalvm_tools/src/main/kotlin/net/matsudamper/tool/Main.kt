@@ -7,12 +7,13 @@ import command.NestedHostCommand
 import java.io.File
 import kotlin.system.exitProcess
 
-val microsoftGraphApi by lazy {
-    MicrosoftGraphApi(
+fun createMicrosoftGraphApi(verbose: Boolean): MicrosoftGraphApi {
+    return MicrosoftGraphApi(
         tenantId = System.getenv("tenantId"),
         clientId = System.getenv("clientId"),
         clientSecret = System.getenv("clientSecret"),
         userObjectId = System.getenv("userObjectId"),
+        verbose = verbose,
     )
 }
 
@@ -25,15 +26,18 @@ fun main(args: Array<String>) {
                 override val subCommands: List<Command> = listOf(
                     object : ExecutableCommand {
                         override val names: List<String> = listOf("upload")
-                        override val help: String = "upload <Local FileName> <Remote FileName>"
+                        override val help: String = "upload [--verbose] <Local FileName> <Remote FileName>"
                         override fun exec(arguments: List<String>) {
-                            if (arguments.size != 2) {
+                            val verbose = arguments.contains("--verbose")
+                            val paths = arguments.filterNot { it == "--verbose" }
+                            if (paths.size != 2) {
                                 System.err.println("Illegal argument size.")
                                 System.err.println(help)
                                 exitProcess(1)
                             }
-                            val local = arguments[0]
-                            val remote = arguments[1]
+                            val local = paths[0]
+                            val remote = paths[1]
+                            val microsoftGraphApi = createMicrosoftGraphApi(verbose = verbose)
 
                             val token = microsoftGraphApi.getBearerToken()
                             microsoftGraphApi.createUploadSession(
@@ -45,10 +49,11 @@ fun main(args: Array<String>) {
                     },
                     object : ExecutableCommand {
                         override val names: List<String> = listOf("upload-diff")
-                        override val help: String = "upload-diff [--dry-run] <Local Directory> <Remote Directory>"
+                        override val help: String = "upload-diff [--dry-run] [--verbose] <Local Directory> <Remote Directory>"
                         override fun exec(arguments: List<String>) {
                             val dryRun = arguments.contains("--dry-run")
-                            val paths = arguments.filterNot { it == "--dry-run" }
+                            val verbose = arguments.contains("--verbose")
+                            val paths = arguments.filterNot { it == "--dry-run" || it == "--verbose" }
                             if (paths.size != 2) {
                                 System.err.println("Illegal argument size.")
                                 System.err.println(help)
@@ -63,6 +68,7 @@ fun main(args: Array<String>) {
                                 .filter { it.isNotEmpty() }
                                 .joinToString("") { "/" + encodePathSegment(it) }
 
+                            val microsoftGraphApi = createMicrosoftGraphApi(verbose = verbose)
                             val token = microsoftGraphApi.getBearerToken()
                             val remoteFiles = microsoftGraphApi.listFilesRecursive(
                                 folderPath = remoteDir,
