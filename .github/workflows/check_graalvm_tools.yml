@@ -3,20 +3,35 @@ on:
   push:
     branches:
       - master
-    paths:
-      - 'graalvm_tools/**'
-      - '.github/workflows/check_graalvm_tools.yml'
   pull_request:
-    paths:
-      - 'graalvm_tools/**'
-      - '.github/workflows/check_graalvm_tools.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
-  check:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      graalvm_tools: ${{ steps.filter.outputs.graalvm_tools }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            graalvm_tools:
+              - 'graalvm_tools/**'
+              - '.github/workflows/check_graalvm_tools.yml'
+
+  build:
+    needs: changes
+    if: needs.changes.outputs.graalvm_tools == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -29,3 +44,13 @@ jobs:
       - name: build
         working-directory: graalvm_tools
         run: ./gradlew build nativeCompile
+
+  check:
+    needs: [changes, build]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: check result
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
