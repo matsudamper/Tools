@@ -30,7 +30,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          tag="graalvm_tools_$(TZ=Asia/Tokyo date +%Y-%m-%d)"
+          tag="graalvm_tools_$(TZ=Asia/Tokyo date +%Y-%m-%d_%H-%M)"
           gh release create "$tag" \
             graalvm_tools/build/native/nativeCompile/util \
             --target "$GITHUB_SHA" \
