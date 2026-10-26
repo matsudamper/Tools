@@ -2,7 +2,7 @@ name: check graalvm tools
 on:
   push:
     branches:
-      - main
+      - master
     paths:
       - 'graalvm_tools/**'
       - '.github/workflows/check_graalvm_tools.yml'
